@@ -20,7 +20,7 @@ namespace Feio
       
       this.viewModelFactory = viewModelFactory;
       
-      deleteCommand = new DelegateCommand(() => item.Document.Items.Remove(item));
+      deleteCommand = new DelegateCommand(() => item.Document.Items.Remove(item.Id));
     }
     
     public ICommand DeleteCommand => deleteCommand;
