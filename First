@@ -1,0 +1,12 @@
+using System;
+
+namespace Feio
+{
+  public class Test
+  {
+    public Test()
+    {
+    
+    }
+  }
+}
