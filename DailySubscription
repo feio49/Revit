@@ -8,6 +8,7 @@ public class Product
         {
             throw new NotImplementedException(nameof(name));
         }
+        
         Name = name;
     }
     
@@ -41,13 +42,7 @@ public class Purchase
     
     public Product Product { get; private set; }
     
-    public Mode Mode
-    { 
-        get
-        {
-            return Subscription is YearlySubscription;
-        }
-    }
+    public Mode Mode => Subscription.Mode;
     
     public Subscription Subscription { get; private set; }
     
@@ -103,7 +98,7 @@ public abstract class Subscription
     private readonly Product product;
     private readonly IEnumerable<string> users;
 
-   public Subscription(Purchase purchase)
+   public Subscription(Purchase purchase, Mode mode)
    {
       if (product == null)
       {
@@ -111,7 +106,11 @@ public abstract class Subscription
       }
       
       this.product = product;
+      
+      Mode = mode;
    }
+   
+   public Mode Mode { get; private set; }
    
    public Product Product { get; private set; }
    
@@ -124,24 +123,24 @@ public abstract class Subscription
 
 public class YearlySubscription : Subscription
 {
-   public DailySubscription(Purchase purchase) : base(purchase)
-   {
-   
-   }
-   
-   public override Status GetStatus(string user)
-   {
-    return DateTime.Now() - Date < DateTime.Year ? Status.Ok : Status.Outdated;
-   }
+    public DailySubscription(Purchase purchase) : base(purchase, Mode.Yearly)
+    {
+
+    }
+
+    public override Status GetStatus(string user)
+    {
+        return DateTime.Now() - Date < DateTime.Year ? Status.Ok : Status.Outdated;
+    }
 }
 
 public class DailySubscription : Subscription
 {
     private readonly List<Tuple<string, DateTime>> logins;
-    private readonly Dictionary<string, xxxx> index;
-    public DailySubscription(Purchase purchase) : base(purchase)
+    private readonly Dictionary<string, ICollection<DateTime>> index;
+    public DailySubscription(Purchase purchase) : base(purchase, Mode.Daily)
     {
-        index = new Dictionary<string, xxxx>();
+        index = new Dictionary<string, ICollection<DateTime>>();
         
         logins = new List<Tuple<string, DateTime>>();
     }
@@ -150,8 +149,32 @@ public class DailySubscription : Subscription
     {
         var dateTime = DateTime.Now();
         
+        if(index.ContainsKey(user))
+        {
+            var last = index[user].Last();
+            
+            
+        }
+        else
+        {
+            if(Units == 0)
+            {
+                return Status.Empty;
+            }
+            
+            var list = new List<DateTime>();
+            
+            index.Add(user, list);
+        }
+        
         logins.Add(user, dateTime);
-        return DateTime.Now() - Date < DateTime.Year;
+        
+        return DateTime.Now() - Date < DateTime.Day;
+    }
+    
+    private DateTime GetLast()
+    {
+    
     }
 }
 
