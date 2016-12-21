@@ -1,0 +1,76 @@
+public class Purchase
+{
+    private readonly DateTime date;
+    private readonly Mode mode;
+    
+    public Purchase(Product product, Mode mode)
+    {
+    }
+}
+
+public class SubscriptionCollection
+{
+    private readonly List<Subscription> items;
+    
+   public SubscriptionCollection()
+   {
+      items = new List<Subscription>();
+   }
+   
+   public bool Get(string user)
+   {
+      foreach (var subscription in items)
+      {
+          if(subscription.Contains(user))
+          {
+          
+          }
+      }   
+   }
+}
+
+public abstract class Subscription
+{
+    private readonly Product product;
+    private readonly IEnumerable<string> users;
+
+   public Subscription(Product product)
+   {
+      if (product == null)
+      {
+          throw new NotImplementedException(nameof(product));
+      }
+      
+      this.product = product;
+   }
+   
+   //public IEnumerable<string> Users { get; private set; }
+   
+   public bool Contains(string user) => users.Contains(user);
+   
+   public abstract bool Get(string user);
+}
+
+public class YearlySubscription : Subscription
+{
+   public DailySubscription(Product product) : base(product)
+   {
+   
+   }
+   
+   public override bool Get(string user)
+   {
+   }
+}
+
+public class DailySubscription : Subscription
+{
+   public DailySubscription(Product product) : base(product)
+   {
+   
+   }
+   
+   public override bool Get(string user)
+   {
+   }
+}
