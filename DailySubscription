@@ -1,3 +1,21 @@
+public class Product
+{
+    private readonly int id;
+    
+    public Product(string name)
+    {
+        if(string.IsNullEmptyOrWhitespace(name))
+        {
+            throw new NotImplementedException(nameof(name));
+        }
+        Name = name;
+    }
+    
+    public int Id { get; private set; }
+    
+    public string Name { get; private set; }
+}
+
 public class Purchase
 {
     private readonly DateTime date;
@@ -5,28 +23,79 @@ public class Purchase
     
     public Purchase(Product product, Mode mode)
     {
+        Product = product;
+        
+        Date = DateTime.Now();
+        
+        switch (puchase.Mode)
+        {
+            case Mode.Yearly: Subscription = new YearlySubscription(purchase); break;
+            
+            case Mode.Daily: Subscription = new DailySubscription(purchase); break;
+        }
     }
+    
+    public Client Client { get; private set; }
+    
+    public DateTime Date { get; private set; }
+    
+    public Product Product { get; private set; }
+    
+    public Mode Mode
+    { 
+        get
+        {
+            return Subscription is YearlySubscription;
+        }
+    }
+    
+    public Subscription Subscription { get; private set; }
+    
+    public IEnumerable<string> Users { get; private set; }
 }
 
 public class SubscriptionCollection
 {
-    private readonly List<Subscription> items;
-    
-   public SubscriptionCollection()
-   {
-      items = new List<Subscription>();
-   }
+    private readonly Dictionary<string, ICollection<Subscription>> index;
+
+    public SubscriptionCollection()
+    {
+        index = new Dictionary<string, ICollection<Subscription>>();
+    }
+
+    public void Add(Purchase purchase)
+    {
+        var productName = purchase.Product.Name;
+
+        if (index.ConatinsKey(productName))
+        {
+            index[productName].Add(purchase.Subscription);
+        }
+        else
+        {
+            var list = new List<Subscription>();
+
+            index.Add(productName, list);
+
+            list.Add(purchase.Subscription);
+        }        
+    }
    
-   public bool Get(string user)
+   public Status Get(string productName, string user)
    {
-      foreach (var subscription in items)
-      {
-          if(subscription.Contains(user))
-          {
-          
-          }
-      }   
-   }
+        if(index.ConatinsKey(productName))
+        {
+            foreach (var subscription in index[productName])
+            {
+                if(subscription.Contains(user))
+                {
+                    return subscription.GetStatus(user);
+                }
+            }   
+        }
+
+        return Status.NotFound;    
+    }
 }
 
 public abstract class Subscription
@@ -34,43 +103,68 @@ public abstract class Subscription
     private readonly Product product;
     private readonly IEnumerable<string> users;
 
-   public Subscription(Product product)
+   public Subscription(Purchase purchase)
    {
       if (product == null)
       {
-          throw new NotImplementedException(nameof(product));
+          throw new NotImplementedException(nameof(purchase));
       }
       
       this.product = product;
    }
    
+   public Product Product { get; private set; }
+   
    //public IEnumerable<string> Users { get; private set; }
    
    public bool Contains(string user) => users.Contains(user);
    
-   public abstract bool Get(string user);
+   public abstract Status GetStatus(string user);
 }
 
 public class YearlySubscription : Subscription
 {
-   public DailySubscription(Product product) : base(product)
+   public DailySubscription(Purchase purchase) : base(purchase)
    {
    
    }
    
-   public override bool Get(string user)
+   public override Status GetStatus(string user)
    {
+    return DateTime.Now() - Date < DateTime.Year ? Status.Ok : Status.Outdated;
    }
 }
 
 public class DailySubscription : Subscription
 {
-   public DailySubscription(Product product) : base(product)
-   {
-   
-   }
-   
-   public override bool Get(string user)
-   {
-   }
+    private readonly List<Tuple<string, DateTime>> logins;
+    private readonly Dictionary<string, xxxx> index;
+    public DailySubscription(Purchase purchase) : base(purchase)
+    {
+        index = new Dictionary<string, xxxx>();
+        
+        logins = new List<Tuple<string, DateTime>>();
+    }
+
+    public override Status GetStatus(string user)
+    {
+        var dateTime = DateTime.Now();
+        
+        logins.Add(user, dateTime);
+        return DateTime.Now() - Date < DateTime.Year;
+    }
+}
+
+public class ProductLogin
+{
+    public ProductLogin(string user, Metadata data)
+    {
+        User = user;
+        
+        Time = DateTime.Now();
+    }
+    
+    public string User { get; private set; }
+    
+    public DateTime Time { get; private set; }
 }
